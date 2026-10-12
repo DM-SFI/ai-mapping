@@ -34,6 +34,8 @@ h3{font:700 17px/1.3 var(--f-display);margin:0 0 8px}
 .meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:14px;color:var(--muted)}
 .meta b{color:var(--ink);font-weight:600}
 .banner{margin:16px 0 0;padding:10px 14px;border-radius:var(--r);font-size:14px;background:var(--blue-soft);color:var(--ink)}
+.banner.draft{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:var(--chip)}
+.linkbtn{font:inherit;font-weight:600;color:var(--blue);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
 .banner.off{background:color-mix(in srgb,var(--yellow) 22%,var(--surface))}
 .rail{display:flex;gap:4px;margin:26px 0 8px}
 .rail button{flex:1;height:6px;border:0;border-radius:3px;background:var(--line);cursor:pointer;padding:0}
@@ -131,6 +133,7 @@ td.num{font-variant-numeric:tabular-nums}
     <p class="lede">המיפוי עוזר לנו להבין איך עובדים היום עם AI בארגון. אין תשובות נכונות או לא נכונות. נשתמש בתשובות כדי להבין את המצב הקיים ואת הצרכים, ולתכנן כלים ותוכניות עבודה.</p>
     <div class="meta"><span><b>כ-9 דקות</b></span><span>7 חלקים</span></div>
     <div class="banner" id="mode-banner">בודקים חיבור…</div>
+    <div class="banner draft" id="draft-note" hidden><span>ממשיכים מטיוטה שנשמרה בדפדפן הזה.</span> <button type="button" class="linkbtn" id="draft-reset">ניקוי והתחלה מחדש</button></div>
 
     <div class="rail" id="rail"></div>
     <div class="stepmeta" id="stepmeta"></div>
@@ -207,7 +210,8 @@ const STEPS=['פרטים','כלים ומינויים','חיבורים','שימו
 const blank=()=>({v:1,name:'',unit:'',subunit:'',role:'',tools:{},other:[{name:'',u:'some'}],fav:'',wantTool:'',conn:[],connWant:[],connWhy:'',freq:null,uses:[],win:'',skills:{},level:null,data:[],block:{},blockOther:'',barriers:[],needs:[],wish:'',intake:'',comment:''});
 let R=blank(), step=0, mode='checking', db=null, user=null, uid=null, isOwner=false, submitted=false;
 const DRAFT='sfi-ai-survey-draft';
-try{const d=JSON.parse(localStorage.getItem(DRAFT)||'null'); if(d&&d.v===1) R=Object.assign(blank(),d);}catch(e){}
+let fromDraft=false;
+try{const d=JSON.parse(localStorage.getItem(DRAFT)||'null'); if(d&&d.v===1){R=Object.assign(blank(),d);fromDraft=!!(d.name||d.unit||d.freq!=null)}}catch(e){}
 const saveDraft=()=>{try{localStorage.setItem(DRAFT,JSON.stringify(R))}catch(e){}};
 
 const $=s=>document.querySelector(s);
@@ -337,7 +341,7 @@ async function submit(){
 }
 function done(saved,body){
   submitted=true;try{localStorage.removeItem(DRAFT)}catch(e){}
-  $('#rail').hidden=$('#stepmeta').hidden=$('#nav').hidden=true;$('#err').textContent='';$('#mode-banner').hidden=true;
+  $('#rail').hidden=$('#stepmeta').hidden=$('#nav').hidden=true;$('#err').textContent='';$('#mode-banner').hidden=true;$('#draft-note').hidden=true;
   if(saved&&mode==='cloud'){
     $('#step').replaceChildren(h('div',{class:'card done-card'},h('h2',{},'התשובות נשלחו. תודה!'),h('p',{class:'lede'},'אם תרצו לשנות משהו, אפשר למלא שוב, והתשובה האחרונה היא שתיספר.')));
     return;
@@ -469,6 +473,10 @@ function renderResults(){
           importMsg.textContent=`נקלטו ${ok} תשובות${bad?`, ${bad} קודים לא תקינים`:''}.`;if(ok)importArea.value='';}}},'קליטה'),importMsg))
     ));
 }
+
+/* ---------- draft notice ---------- */
+const dn=document.getElementById('draft-note');dn.hidden=!fromDraft;
+document.getElementById('draft-reset').addEventListener('click',()=>{try{localStorage.removeItem(DRAFT)}catch(e){}R=blank();dn.hidden=true;go(0)});
 
 /* ---------- boot ---------- */
 function setBanner(){
