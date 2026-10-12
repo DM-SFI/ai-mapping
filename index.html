@@ -129,7 +129,7 @@ td.num{font-variant-numeric:tabular-nums}
     <div class="eyebrow">תחום מוצר ופתרונות דיגיטליים</div>
     <h1>מיפוי שימושי AI בארגון</h1>
     <p class="lede">המיפוי עוזר לנו להבין איך עובדים היום עם AI בארגון. אין תשובות נכונות או לא נכונות. נשתמש בתשובות כדי להבין את המצב הקיים ואת הצרכים, ולתכנן כלים ותוכניות עבודה.</p>
-    <div class="meta"><span><b>כ-9 דקות</b></span><span>7 חלקים</span><span>רק מור מיטרני רואה את התשובות</span></div>
+    <div class="meta"><span><b>כ-9 דקות</b></span><span>7 חלקים</span></div>
     <div class="banner" id="mode-banner">בודקים חיבור…</div>
 
     <div class="rail" id="rail"></div>
@@ -259,7 +259,7 @@ const stepViews=[
    return [
    q('אילו כלים מכירים, ובאילו משתמשים בפועל?',h('div',{class:'q'},TOOLS.map(t=>{R.tools[t.id]=R.tools[t.id]||{u:'unknown'};return toolRow(t,R.tools[t.id])})),{hint:'לכל כלי מסמנים עד כמה משתמשים בו.'}),
    q('כלים נוספים',h('div',{class:'q'},R.other.map((o,i)=>toolRow({idx:i},o,true)),R.other.length<4?h('button',{type:'button',class:'chip',on:{click(){R.other.push({name:'',u:'some'});render()}}},'+ עוד כלי'):null)),
-   q('איזה כלי הכי מועיל לך בעבודה?',used.length?chips(used,'fav',{single:true}):h('div',{class:'hint'},'יופיע כאן אחרי שמסמנים כלים בשימוש.')),
+   q('איזה כלי הכי מועיל לך בעבודה?',used.length?chips(used,'fav',{single:true}):h('div',{class:'hint'},'האפשרויות יופיעו אחרי שמסמנים למעלה כלים שמשתמשים בהם.'),{hint:used.length?'מתוך הכלים שסימנת שמשתמשים בהם (לפעמים או באופן קבוע).':''}),
    q('לאיזה כלי היית רוצה גישה ואין לך היום?',text('wantTool',{ph:'אפשר להשאיר ריק'}),{forId:'f-wantTool'})
  ]},
  ()=>[
@@ -274,12 +274,12 @@ const stepViews=[
    q('השימוש הכי מוצלח שלך עד היום',text('win',{area:true,ph:'משפט או שניים. אם עוד אין, אפשר לדלג.'}),{forId:'f-win'})
  ],
  ()=>[
-   q('עד כמה את/ה שולט/ת בכל אחד מאלה?',h('div',{class:'scale'},SKILLS.map(([k,l])=>h('div',{class:'srow'},h('div',{style:'font-weight:500'},l),h('div',{class:'seg'},SCALE.map((s,i)=>h('button',{type:'button','aria-pressed':String(R.skills[k]===i+1),on:{click(){R.skills[k]=i+1;saveDraft();render()}}},s)))))),{hint:'אין תשובה נכונה. התמונה הזו עוזרת לנו לתכנן הדרכות ברמה הנכונה.'}),
+   q('עד כמה את/ה שולט/ת בכל אחד מאלה?',h('div',{class:'scale'},SKILLS.map(([k,l])=>h('div',{class:'srow'},h('div',{style:'font-weight:500'},l),h('div',{class:'seg'},SCALE.map((s,i)=>h('button',{type:'button','aria-pressed':String(R.skills[k]===i+1),on:{click(){R.skills[k]=i+1;saveDraft();render()}}},s)))))),{}),
    q('איפה הייתם ממקמים את עצמכם מבחינת יכולות AI?',options(LEVELS,'level',{numbered:true}),{req:true})
  ],
  ()=>[
-   q('עם איזה סוג מידע עובדים בכלי AI?',chips(DATA,'data'),{hint:'השאלה כאן כדי לבנות נוהל ברור לכולם, לא כדי לבדוק מישהו.'}),
-   q('עד כמה כל אחד מאלה מעכב אותך מלהשתמש יותר ב-AI?',h('div',{class:'scale'},BLOCKS.map(([k,,l])=>h('div',{class:'srow'},h('div',{style:'font-weight:500'},l),h('div',{class:'seg'},BSCALE.map((b,i)=>h('button',{type:'button','aria-pressed':String(R.block[k]===i),on:{click(){R.block[k]=i;saveDraft();render()}}},b)))))),{hint:'כך נבין על מה נשען הקושי: ידע, אמון, זמן, גישה או משהו אחר. אין תשובה נכונה.'}),
+   q('עם איזה סוג מידע עובדים בכלי AI?',chips(DATA,'data'),{hint:'אפשר לבחור כמה.'}),
+   q('עד כמה כל אחד מאלה מעכב אותך מלהשתמש יותר ב-AI?',h('div',{class:'scale'},BLOCKS.map(([k,,l])=>h('div',{class:'srow'},h('div',{style:'font-weight:500'},l),h('div',{class:'seg'},BSCALE.map((b,i)=>h('button',{type:'button','aria-pressed':String(R.block[k]===i),on:{click(){R.block[k]=i;saveDraft();render()}}},b)))))),{hint:'כך נבין על מה נשען הקושי: ידע, אמון, זמן, גישה או משהו אחר.'}),
    q('משהו אחר שמעכב?',text('blockOther',{ph:'אפשר להשאיר ריק'}),{forId:'f-blockOther'})
  ],
  ()=>[
@@ -339,11 +339,11 @@ function done(saved,body){
   submitted=true;try{localStorage.removeItem(DRAFT)}catch(e){}
   $('#rail').hidden=$('#stepmeta').hidden=$('#nav').hidden=true;$('#err').textContent='';$('#mode-banner').hidden=true;
   if(saved&&mode==='cloud'){
-    $('#step').replaceChildren(h('div',{class:'card done-card'},h('h2',{},'התשובות נשלחו. תודה!'),h('p',{class:'lede'},'הן הגיעו למור. אם תרצו לשנות משהו, אפשר למלא שוב, והתשובה האחרונה היא שתיספר.')));
+    $('#step').replaceChildren(h('div',{class:'card done-card'},h('h2',{},'התשובות נשלחו. תודה!'),h('p',{class:'lede'},'אם תרצו לשנות משהו, אפשר למלא שוב, והתשובה האחרונה היא שתיספר.')));
     return;
   }
   if(saved){
-    $('#step').replaceChildren(h('div',{class:'card done-card'},h('h2',{},'התשובות נשמרו. תודה!'),h('p',{class:'lede'},'הן הגיעו למור. אפשר לחזור לדף הזה ולעדכן אותן בכל שלב, והגרסה האחרונה היא שתישמר.'),h('div',{},h('button',{class:'btn ghost',type:'button',on:{click(){submitted=false;$('#rail').hidden=$('#stepmeta').hidden=$('#nav').hidden=false;$('#mode-banner').hidden=false;$('#next').disabled=false;go(0)}}},'עריכת התשובות'))));
+    $('#step').replaceChildren(h('div',{class:'card done-card'},h('h2',{},'התשובות נשמרו. תודה!'),h('p',{class:'lede'},'אפשר לחזור לדף הזה ולעדכן אותן בכל שלב.'),h('div',{},h('button',{class:'btn ghost',type:'button',on:{click(){submitted=false;$('#rail').hidden=$('#stepmeta').hidden=$('#nav').hidden=false;$('#mode-banner').hidden=false;$('#next').disabled=false;go(0)}}},'עריכת התשובות'))));
     return;
   }
   const code=enc(body);
